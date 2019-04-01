@@ -15,8 +15,9 @@ res <- read_csv("restaurant_data.csv") %>% na.omit(res)
 sb <- res %>% filter(res$DBA == "STARBUCKS") %>% group_by(CAMIS)
 shops_sb <- summarize(sb, shops = n())
 
-zip_unique <- res[, 1:8] %>% distinct()
-zip_shops <-
-  zip %>% group_by(ZIPCODE) %>% summarise(shops = n_distinct(CAMIS))
+res_unique <- res[, 1:8] %>% distinct()
+
+class(res$`INSPECTION DATE`)
+
 ```
 
