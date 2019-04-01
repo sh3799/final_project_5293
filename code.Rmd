@@ -12,6 +12,6 @@ library(tidyverse)
 # test
 res <- read_csv("restaurant_data.csv")
 attach(res)
-
+res <- na.omit(res)
 ```
 
