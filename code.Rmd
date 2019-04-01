@@ -11,5 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 # test
 res <- read_csv("restaurant_data.csv")
+attach(res)
+
 ```
 
