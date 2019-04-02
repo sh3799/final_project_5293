@@ -34,6 +34,10 @@ res$`CUISINE DESCRIPTION` <-
     "Bottled beverages",
     res$`CUISINE DESCRIPTION`
   )
+
+# Latest record for same restaurant
+res_one <-
+  arrange(res, desc(`GRADE DATE`)) %>% distinct(CAMIS, .keep_all = TRUE)
 ```
 
 cleveland dot plot of cuisine type by borough
@@ -51,8 +55,7 @@ Exploring cuisine types and geolocations
 # remove repeated record for same restaurant
 res_unique <- res[, 1:8] %>% distinct()
 # Keep only the latest grading for each restaurant
-res_one <-
-  arrange(res, desc(`GRADE DATE`)) %>% distinct(CAMIS, .keep_all = TRUE)
+
 # Subsetting for restaurant near columbia
 res_columbia <- filter(res_one,
                        res_one$ZIPCODE == 10025 |
