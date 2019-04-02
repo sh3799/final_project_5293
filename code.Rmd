@@ -97,6 +97,8 @@ American.names<-unique(American$DBA)
 res<-rquery.wordcloud(filePath, type ="file", lang = "english")
 wordcloud2(demoFreq)
 #data<-American %>% %>%mutate(Freq=n())
+
+
 ```
 
 starbucks and shake shack
