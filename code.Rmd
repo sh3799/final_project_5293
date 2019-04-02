@@ -10,14 +10,27 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(tidyverse)
 # test
-res <- read_csv("restaurant_data.csv") %>% na.omit(res)
+res <- read_csv("restaurant_data.csv",
+                  col_types=cols(`INSPECTION DATE`=col_date(format="%m / %d / %Y"),
+                                 `GRADE DATE`=col_date(format="%m / %d / %Y"),
+                                 `RECORD DATE`=col_date(format="%m / %d / %Y"))
+                ) %>%na.omit(res)
 
+# Data for exploring cuisine types and geolocations, removed repeated lines for same restaurant
+res_unique <- res[, 1:8] %>% distinct()
+res_columbia <- filter(res_unique,
+                       res_unique$ZIPCODE==10025|
+                       res_unique$ZIPCODE==10026|
+                       res_unique$ZIPCODE==10027)
+
+#starbucks
 sb <- res %>% filter(res$DBA == "STARBUCKS") %>% group_by(CAMIS)
 shops_sb <- summarize(sb, shops = n())
 
-res_unique <- res[, 1:8] %>% distinct()
+#shake shack
+ss <- res %>% filter(res$DBA == "SHAKE SHACK") %>% group_by(CAMIS)
+shops_ss <- summarize(ss, shops = n())
 
-class(res$`INSPECTION DATE`)
 
 ```
 
