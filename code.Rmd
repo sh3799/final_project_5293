@@ -7,6 +7,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+Import and modify Data
+
 ```{r}
 library(tidyverse)
 library(stringr)
@@ -32,8 +34,21 @@ res$`CUISINE DESCRIPTION` <-
     "Bottled beverages",
     res$`CUISINE DESCRIPTION`
   )
+```
 
-# Data for exploring cuisine types and geolocations, removed repeated lines for same restaurant
+cleveland dot plot of cuisine type by borough
+
+```{r}
+
+
+
+
+```
+
+Exploring cuisine types and geolocations
+
+```{r}
+# remove repeated record for same restaurant
 res_unique <- res[, 1:8] %>% distinct()
 # Keep only the latest grading for each restaurant
 res_one <-
@@ -54,7 +69,11 @@ ggplot(res_columbia_sum) +
 ggplot(res_columbia_sum) +
   geom_point(aes(x = reorder(`CUISINE DESCRIPTION`, total), y = total), stat = "identity") +
   coord_flip()
+```
 
+starbucks and shake shack
+
+```{r}
 #starbucks
 sb <- res %>% filter(res$DBA == "STARBUCKS") %>% group_by(CAMIS)
 shops_sb <- summarize(sb, shops = n())
