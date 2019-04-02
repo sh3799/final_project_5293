@@ -9,20 +9,51 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(tidyverse)
-# test
-res <- read_csv("restaurant_data.csv",
-                  col_types=cols(`INSPECTION DATE`=col_date(format="%m / %d / %Y"),
-                                 `GRADE DATE`=col_date(format="%m / %d / %Y"),
-                                 `RECORD DATE`=col_date(format="%m / %d / %Y"))
-                ) %>%na.omit(res)
+library(stringr)
+res <- read_csv(
+  "restaurant_data.csv",
+  col_types = cols(
+    `INSPECTION DATE` = col_date(format = "%m / %d / %Y"),
+    `GRADE DATE` = col_date(format = "%m / %d / %Y"),
+    `RECORD DATE` = col_date(format = "%m / %d / %Y")
+  )
+) %>% na.omit(res)
+# replace names that are too long
+res$`CUISINE DESCRIPTION` <-
+  gsub(
+    "Latin \\(Cuban, Dominican, Puerto Rican, South & Central American\\)",
+    "Latin",
+    res$`CUISINE DESCRIPTION`
+  )
+
+res$`CUISINE DESCRIPTION` <-
+  gsub(
+    "Bottled beverages, including water, sodas, juices, etc.",
+    "Bottled beverages",
+    res$`CUISINE DESCRIPTION`
+  )
 
 # Data for exploring cuisine types and geolocations, removed repeated lines for same restaurant
 res_unique <- res[, 1:8] %>% distinct()
-
-res_columbia <- filter(res_unique,
-                       res_unique$ZIPCODE==10025|
-                       res_unique$ZIPCODE==10026|
-                       res_unique$ZIPCODE==10027)
+# Keep only the latest grading for each restaurant
+res_one <-
+  arrange(res, desc(`GRADE DATE`)) %>% distinct(CAMIS, .keep_all = TRUE)
+# Subsetting for restaurant near columbia
+res_columbia <- filter(res_one,
+                       res_one$ZIPCODE == 10025 |
+                         res_one$ZIPCODE == 10026 |
+                         res_one$ZIPCODE == 10027)
+res_columbia_sum <-
+  res_columbia %>% group_by(`CUISINE DESCRIPTION`) %>% summarize(total =
+                                                                   n()) %>% arrange(desc(total))
+# histogram
+ggplot(res_columbia_sum) +
+  geom_histogram(aes(x = reorder(`CUISINE DESCRIPTION`, total), y = total), stat = "identity") +
+  coord_flip()
+# cleveland dot plot
+ggplot(res_columbia_sum) +
+  geom_point(aes(x = reorder(`CUISINE DESCRIPTION`, total), y = total), stat = "identity") +
+  coord_flip()
 
 #starbucks
 sb <- res %>% filter(res$DBA == "STARBUCKS") %>% group_by(CAMIS)
