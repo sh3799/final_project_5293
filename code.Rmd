@@ -18,6 +18,7 @@ res <- read_csv("restaurant_data.csv",
 
 # Data for exploring cuisine types and geolocations, removed repeated lines for same restaurant
 res_unique <- res[, 1:8] %>% distinct()
+
 res_columbia <- filter(res_unique,
                        res_unique$ZIPCODE==10025|
                        res_unique$ZIPCODE==10026|
