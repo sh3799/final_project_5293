@@ -43,8 +43,15 @@ res_one <-
 cleveland dot plot of cuisine type by borough
 
 ```{r}
+res_borough <- res_one[,c(3,8)] 
+res_borough$count <- rep(1,nrow(res_borough))
+res_borough_t <- res_borough %>% group_by(`BORO`,`CUISINE DESCRIPTION`) %>% mutate(count=n()) %>% distinct()
 
-
+ggplot(res_borough_t,aes(x=count,
+                  y=fct_reorder2(`CUISINE DESCRIPTION`,BORO=="MANHATTAN",-count),
+                  color=BORO)
+                  )+  
+  geom_point()+ylab("")
 
 
 
