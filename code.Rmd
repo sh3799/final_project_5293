@@ -80,23 +80,21 @@ ggplot(res_columbia_sum) +
 ggplot(res_columbia_sum) +
   geom_point(aes(x = reorder(`CUISINE DESCRIPTION`, total), y = total), stat = "identity") +
   coord_flip()
-
+```
+# word cloud
+```{r}
 #eg1: American cuisine
-American<- filter(res_columbia, res_columbia$`CUISINE DESCRIPTION` =="American")
-# Install
-install.packages("tm")  # for text mining
-install.packages("SnowballC") # for text stemming
-install.packages("wordcloud2") # word-cloud generator 
-install.packages("RColorBrewer") # color palettes
+American<- filter(res_columbia, res_columbia$`CUISINE DESCRIPTION` =="American") %>% distinct(DBA)%>% paste(sep=" ")%>%str_remove()
+American
 # Load
 library("tm")
 library("SnowballC")
-library("wordcloud2")
+library("wordcloud")
 library("RColorBrewer")
-American.names<-unique(American$DBA)
-res<-rquery.wordcloud(filePath, type ="file", lang = "english")
-wordcloud2(demoFreq)
-#data<-American %>% %>%mutate(Freq=n())
+library("RCurl")
+library("XML")
+library("rquery")
+res1<-rquery.wordcloud(American, type ="file", lang = "english")
 
 
 ```
@@ -112,6 +110,8 @@ shops_sb <- summarize(sb, shops = n())
 ss <- res %>% filter(res$DBA == "SHAKE SHACK") %>% group_by(CAMIS)
 shops_ss <- summarize(ss, shops = n())
 
+jg <- res %>% filter(res$DBA == "JUICE GENERATION") %>% group_by(CAMIS)
+shops_jg <- summarize(jg, shops = n())
 
 ```
 
