@@ -112,6 +112,19 @@ word.freq.j <- table(strsplit(Japanese, " ")) %>% as.data.frame()
 colnames(word.freq.j) <- c("Word","Freq")
 wordcloud(word.freq.j$Word,word.freq.j$Freq)
 ```
+zipcode plots
+```{r}
+library(zipcode)
+data(zipcode)
+# clean up zipcode
+res_one$ZIPCODE <- clean.zipcodes(res_one$ZIPCODE)
+res_zip <- res_one %>% group_by(ZIPCODE)%>% summarise(number=n())
+colnames(res_zip) <- c("zip","number")
+# merge with geolocation data
+res_zip <- merge(res_zip,zipcode,by='zip')
+
+library(choroplethr)
+```
 
 starbucks and shake shack
 
