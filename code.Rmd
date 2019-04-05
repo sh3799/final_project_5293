@@ -114,16 +114,34 @@ wordcloud(word.freq.j$Word,word.freq.j$Freq)
 ```
 zipcode plots
 ```{r}
-library(zipcode)
-data(zipcode)
-# clean up zipcode
-res_one$ZIPCODE <- clean.zipcodes(res_one$ZIPCODE)
-res_zip <- res_one %>% group_by(ZIPCODE)%>% summarise(number=n())
-colnames(res_zip) <- c("zip","number")
-# merge with geolocation data
-res_zip <- merge(res_zip,zipcode,by='zip')
-
 library(choroplethr)
+library(choroplethrZip)
+# NYC zipmap
+res_zip <- res_one %>% group_by(ZIPCODE)%>% summarise(number=n())
+colnames(res_zip) <- c("region","value")
+nyc_fips <- c(36005, 36047, 36061, 36081, 36085)
+zip_choropleth(res_zip,
+                county_zoom = nyc_fips,
+                title      = "Number of restaurants in New York",
+                legend     = "count")
+
+# Manhattan zipmap
+res_man_zip <- res_one %>%filter(BORO=="MANHATTAN") %>%group_by(ZIPCODE)%>% summarise(number=n())
+colnames(res_man_zip) <- c("region","value")
+zip_choropleth(res_man_zip,
+                county_zoom = 36061,
+                title      = "Number of restaurants in Manhattan",
+                legend     = "count")
+
+# Manhattan Chinese zipmap
+res_man_ch_zip <- res_one %>%filter(BORO=="MANHATTAN",`CUISINE DESCRIPTION`=="Chinese") %>%group_by(ZIPCODE)%>% summarise(number=n())
+colnames(res_man_ch_zip) <- c("region","value")
+zip_choropleth(res_man_ch_zip,
+                county_zoom = 36061,
+                title      = "Number of Chinese restaurants in Manhattan",
+                legend     = "count")
+
+               
 ```
 
 starbucks and shake shack
