@@ -148,15 +148,10 @@ starbucks and shake shack
 
 ```{r}
 #starbucks
-sb <- res %>% filter(res$DBA == "STARBUCKS") %>% group_by(CAMIS)
-shops_sb <- summarize(sb, shops = n())
+sb <- res_one %>% filter(res_one$DBA == "STARBUCKS")
 
 #shake shack
-ss <- res %>% filter(res$DBA == "SHAKE SHACK") %>% group_by(CAMIS)
-shops_ss <- summarize(ss, shops = n())
-
-jg <- res %>% filter(res$DBA == "JUICE GENERATION") %>% group_by(CAMIS)
-shops_jg <- summarize(jg, shops = n())
+ss <- res_one %>% filter(res_one$DBA == "SHAKE SHACK")
 
 ```
 
