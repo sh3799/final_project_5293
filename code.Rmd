@@ -167,14 +167,18 @@ res_viotype[1:10,]$`VIOLATION DESCRIPTION` <- c("Non-food contact surface improp
 ggplot(top_n(res_viotype,10),aes(x=`VIOLATION DESCRIPTION`,y=n))+
   geom_bar(stat = "identity")+ coord_flip()+ggtitle("Top 10 violation reasons")
 
-res_vioboro <- res%>% group_by(`VIOLATION CODE`,`BORO`)%>% tally() %>% arrange(desc(n)) %>% group_by(BORO) %>% top_n(5)
+res_vioboro <- res%>% group_by(`VIOLATION CODE`,`BORO`) %>% tally() %>% arrange(desc(n)) %>% group_by(BORO) %>% top_n(5)
 
 ggplot(res_vioboro,aes(x=`VIOLATION CODE`,y=n))+
   geom_bar(stat = "identity")+ 
   facet_wrap(~BORO,scales = "free")+
   ggtitle("Top 5 violation reasons for each borough")
 
+cuisine.top15 <- res %>% group_by(`CUISINE DESCRIPTION`) %>% tally() %>% top_n(15)
+top15.type <- cuisine.top15$`CUISINE DESCRIPTION` 
+res_gcuisine <- res %>% filter(GRADE==c("A","B","C"))%>% filter(`CUISINE DESCRIPTION`==top15.type) %>% group_by(`CUISINE DESCRIPTION`,GRADE) %>% tally() 
 
-
+ggplot(res_gcuisine,aes(x=`CUISINE DESCRIPTION`,y=n,fill=GRADE))+
+  geom_bar(stat="identity",position = "fill")+coord_flip()+labs(y="Percentage",x="cuisine type")+ggtitle("Percentile of Grade for each cuisine type")
 ```
 
