@@ -20,7 +20,7 @@ res <- read_csv(
     `GRADE DATE` = col_date(format = "%m / %d / %Y"),
     `RECORD DATE` = col_date(format = "%m / %d / %Y")
   )
-) %>% na.omit(res)
+) %>% na.omit(res) %>% filter(BORO != "Missing")
 # replace names that are too long
 res$`CUISINE DESCRIPTION` <-
   gsub(
@@ -46,7 +46,7 @@ cleveland dot plot of cuisine type by borough
 ```{r}
 # not omitting NAs, to include as much restaurants as possible
 
-res_unique <- read_csv("restaurant_data.csv")[, 1:8] %>% distinct()
+res_unique <- read_csv("restaurant_data.csv")[, 1:8] %>% distinct()%>% filter(BORO != "Missing")
 res_unique$`CUISINE DESCRIPTION` <-
   gsub(
     "Latin \\(Cuban, Dominican, Puerto Rican, South & Central American\\)",
@@ -96,6 +96,7 @@ ggplot(res_columbia_sum) +
 ```{r}
 # Chinese cuisine
 
+library("wordcloud2")
 library("wordcloud")
 
 Chinese<- filter(res_one, res_one$`CUISINE DESCRIPTION` =="Chinese") %>% distinct(DBA) %>% toString() %>% str_remove_all(",") %>% str_remove_all("\"") %>% str_remove_all("\n")%>% str_remove_all("/")
@@ -103,7 +104,7 @@ Chinese<- filter(res_one, res_one$`CUISINE DESCRIPTION` =="Chinese") %>% distinc
 word.freq.c <- table(strsplit(Chinese, " ")) %>% as.data.frame()
 colnames(word.freq.c) <- c("Word","Freq")
 wordcloud(word.freq.c$Word,word.freq.c$Freq)
-
+wordcloud2(word.freq.c,minSize = 2)
 # Japanese
 
 Japanese<- filter(res_one, res_one$`CUISINE DESCRIPTION` =="Japanese") %>% distinct(DBA) %>% toString() %>% str_remove_all(",") %>% str_remove_all("\"") %>% str_remove_all("\n")%>% str_remove_all("/")
@@ -111,6 +112,7 @@ Japanese<- filter(res_one, res_one$`CUISINE DESCRIPTION` =="Japanese") %>% disti
 word.freq.j <- table(strsplit(Japanese, " ")) %>% as.data.frame()
 colnames(word.freq.j) <- c("Word","Freq")
 wordcloud(word.freq.j$Word,word.freq.j$Freq)
+wordcloud2(word.freq.j,minSize = 2)
 ```
 zipcode plots
 ```{r}
@@ -152,6 +154,27 @@ sb <- res_one %>% filter(res_one$DBA == "STARBUCKS")
 
 #shake shack
 ss <- res_one %>% filter(res_one$DBA == "SHAKE SHACK")
+
+```
+
+analysis on violations
+
+```{r}
+# clean out the violations
+res_viotype <- res %>% group_by(`VIOLATION DESCRIPTION`) %>% tally() %>% arrange(desc(n))
+# rename to make them shorter
+res_viotype[1:10,]$`VIOLATION DESCRIPTION` <- c("Non-food contact surface improperly constructed","Facility not vermin proof","Food contact surface not properly washed, rinsed and sanitized","Food not protected from potential source of contamination","Plumbing not properly installed or maintained","Evidence of mice or live mice present","Cold food item held above 41ºF","Hot food item not held at or above 140ºF","Filth flies or food/refuse/sewage-associated flies present","Food contact surface not properly maintained")
+ggplot(top_n(res_viotype,10),aes(x=`VIOLATION DESCRIPTION`,y=n))+
+  geom_bar(stat = "identity")+ coord_flip()+ggtitle("Top 10 violation reasons")
+
+res_vioboro <- res%>% group_by(`VIOLATION CODE`,`BORO`)%>% tally() %>% arrange(desc(n)) %>% group_by(BORO) %>% top_n(5)
+
+ggplot(res_vioboro,aes(x=`VIOLATION CODE`,y=n))+
+  geom_bar(stat = "identity")+ 
+  facet_wrap(~BORO,scales = "free")+
+  ggtitle("Top 5 violation reasons for each borough")
+
+
 
 ```
 
