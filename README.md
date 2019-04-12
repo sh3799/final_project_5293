@@ -11,4 +11,29 @@ restaurants near Columbia: 10025,10026,10027
 starbucks & shake shack: inspection date(wwekdays), time series on grade at same store,
 grade(latest) and borough,
 
-hjkkkk
+General Structure:
+
+1. Introduction
+
+2. Description of the data source
+
+3. description of data import, cleaning and transformation
+
+  removed missing values
+  combined data for the same restaurant and kept the most recent record only (for exploring restaurant genres)
+  selected a few chain restaurants and investigated its sanity grades
+  
+4. Analysis of missing values
+
+5. results
+  Two parts:
+    1. Exploring violation data
+    2. Exploring the grading of chain restaurant
+
+
+
+6. Interactive component
+
+7. Conclusion
+
+Bonus: word cloud, etc
