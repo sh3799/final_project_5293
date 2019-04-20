@@ -155,17 +155,6 @@ zip_choropleth(res_man_ch_zip,
                
 ```
 
-starbucks and shake shack
-
-```{r}
-#starbucks
-sb <- res_one %>% filter(res_one$DBA == "STARBUCKS")
-
-#shake shack
-ss <- res_one %>% filter(res_one$DBA == "SHAKE SHACK")
-
-```
-
 analysis on violations
 
 ```{r}
