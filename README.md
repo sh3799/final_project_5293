@@ -30,7 +30,16 @@ General Structure:
         2.2.2 ridgeline plot on top 10 restaurant genre and socre(0~98)
               score range: 0-13:A, 14-27:B, 28+:C
       2.3 Seperate inspection date by month
-        2.3.1 top violation type by month
+        2.3.1 top violation type by month (group violation code by numeric part)
+              02: Food temperature
+              03: Raw material
+              04: Food preparation & storage/ rats and fly (KLMNO)
+              05: Facilities 
+              06: Hygine
+              07: Interfering duty
+              08: Vermin
+              09: 04
+              10: Dining environment
         2.3.2 top restaurant genres' grade change by month
 
 
