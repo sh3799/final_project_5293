@@ -116,11 +116,16 @@ wordcloud2(word.freq.j,minSize = 2)
 ```
 zipcode plots
 ```{r}
+
+library(dplyr)
 library(choroplethr)
+library(devtools)
+#install_github('arilamstein/choroplethrZip@v1.5.0')
 library(choroplethrZip)
 # NYC zipmap
 res_zip <- res_one %>% group_by(ZIPCODE)%>% summarise(number=n())
 colnames(res_zip) <- c("region","value")
+res_zip$region <- as.character(res_zip$region)
 nyc_fips <- c(36005, 36047, 36061, 36081, 36085)
 zip_choropleth(res_zip,
                 county_zoom = nyc_fips,
@@ -130,6 +135,8 @@ zip_choropleth(res_zip,
 # Manhattan zipmap
 res_man_zip <- res_one %>%filter(BORO=="MANHATTAN") %>%group_by(ZIPCODE)%>% summarise(number=n())
 colnames(res_man_zip) <- c("region","value")
+res_man_zip$region <- as.character(res_man_zip$region)
+
 zip_choropleth(res_man_zip,
                 county_zoom = 36061,
                 title      = "Number of restaurants in Manhattan",
@@ -138,6 +145,8 @@ zip_choropleth(res_man_zip,
 # Manhattan Chinese zipmap
 res_man_ch_zip <- res_one %>%filter(BORO=="MANHATTAN",`CUISINE DESCRIPTION`=="Chinese") %>%group_by(ZIPCODE)%>% summarise(number=n())
 colnames(res_man_ch_zip) <- c("region","value")
+res_man_ch_zip$region <- as.character(res_man_ch_zip$region)
+
 zip_choropleth(res_man_ch_zip,
                 county_zoom = 36061,
                 title      = "Number of Chinese restaurants in Manhattan",
