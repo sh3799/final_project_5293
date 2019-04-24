@@ -14,7 +14,7 @@ library(tidyverse)
 library(stringr)
 # Omitting rows with NA, parsed date format
 res <- read_csv(
-  "restaurant_data.csv",
+  "~/Downloads/restaurant_data.csv",
   col_types = cols(
     `INSPECTION DATE` = col_date(format = "%m / %d / %Y"),
     `GRADE DATE` = col_date(format = "%m / %d / %Y"),
@@ -46,7 +46,7 @@ cleveland dot plot of cuisine type by borough
 ```{r}
 # not omitting NAs, to include as much restaurants as possible
 
-res_unique <- read_csv("restaurant_data.csv")[, 1:8] %>% distinct()%>% filter(BORO != "Missing")
+res_unique <- read_csv("~/Downloads/restaurant_data.csv")[, 1:8] %>% distinct()%>% filter(BORO != "Missing")
 res_unique$`CUISINE DESCRIPTION` <-
   gsub(
     "Latin \\(Cuban, Dominican, Puerto Rican, South & Central American\\)",
@@ -179,4 +179,63 @@ res_gcuisine <- res %>% filter(GRADE==c("A","B","C"))%>% filter(`CUISINE DESCRIP
 ggplot(res_gcuisine,aes(x=`CUISINE DESCRIPTION`,y=n,fill=GRADE))+
   geom_bar(stat="identity",position = "fill")+coord_flip()+labs(y="Percentage",x="cuisine type")+ggtitle("Percentile of Grade for each cuisine type")
 ```
+
+time series plot
+```{r}
+#filter date starting 2017-01
+res_ts <- res_one %>% filter(`INSPECTION DATE`>="2017-01-01")
+
+#group violation code by numeric part
+res_ts$`VIOLATION_CODE`<-res_ts$`VIOLATION CODE`
+res_ts$`VIOLATION_CODE`<-str_replace(res_ts$`VIOLATION_CODE`, "[A-Z]", "")
+res_ts$`VIOLATION_CODE`<-str_replace(res_ts$`VIOLATION_CODE`, "09", "04")
+#count(res_one, VIOLATION_CODE) #check group 09 has been merged to group 04
+
+#seperate inspection date by month 
+res_ts$Month_Yr <- substr(res_ts$`INSPECTION DATE`, 0, 7)
+res_one$Month_Yr <- format(as.Date(res_one$`INSPECTION DATE`), "%Y-%m")
+
+#violation type by month
+vio_month <- res_ts %>% 
+  group_by(`Month_Yr`, `VIOLATION_CODE`) %>%
+  summarise(count= n())
+
+ggplot(vio_month, aes(x=`Month_Yr`, y=`count`, color=`VIOLATION_CODE`,
+                      group=factor(`VIOLATION_CODE`)))+
+  geom_point()+
+  geom_line()+
+  ggtitle("Violation type by month",
+          "test")+
+  labs(x="Jan 2017-Apr 2019")
+
+#violation type=02
+vio2<-res_ts %>%
+  filter(`VIOLATION_CODE`=="02") %>%
+  group_by(`Month_Yr`) %>%
+  summarise(count= n())
+
+ggplot(vio2, aes(x=`Month_Yr`, y=`count`, group=1))+
+  geom_point()+geom_line()
+
+#1.合并violation code
+#2.合并时间轴 2019-04-06->2019-04
+#3.按时间轴count() 
+# ts_vio<- res_one %>% group_by(month, VIOLATION_CODE) %>% summarise(count=n())
+#4.画图
+
+#Notes:
+#1. use res_one data 
+#2. contains no Violation_group 07
+#3. use Inspection date  okay
+#4. data from 2017/1-2019/4
+```
+
+
+
+
+
+
+
+
+
 
