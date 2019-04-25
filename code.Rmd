@@ -172,9 +172,9 @@ ggplot(res_vioboro,aes(x=`VIOLATION CODE`,y=n))+
   facet_wrap(~BORO,scales = "free")+
   ggtitle("Top 5 violation reasons for each borough")
 
-cuisine.top15 <- res %>% group_by(`CUISINE DESCRIPTION`) %>% tally() %>% top_n(15)
-top15.type <- cuisine.top15$`CUISINE DESCRIPTION` 
-res_gcuisine <- res %>% filter(GRADE==c("A","B","C"))%>% filter(`CUISINE DESCRIPTION`==top15.type) %>% group_by(`CUISINE DESCRIPTION`,GRADE) %>% tally() 
+cuisine.top10 <- res %>% group_by(`CUISINE DESCRIPTION`) %>% tally() %>% top_n(10)
+top10.type <- cuisine.top10$`CUISINE DESCRIPTION` 
+res_gcuisine <- res %>% filter(GRADE==c("A","B","C"))%>% filter(`CUISINE DESCRIPTION`==top10.type) %>% group_by(`CUISINE DESCRIPTION`,GRADE) %>% tally() 
 
 ggplot(res_gcuisine,aes(x=`CUISINE DESCRIPTION`,y=n,fill=GRADE))+
   geom_bar(stat="identity",position = "fill")+coord_flip()+labs(y="Percentage",x="cuisine type")+ggtitle("Percentile of Grade for each cuisine type")
@@ -214,7 +214,7 @@ res_gczip_man <- filter(res_gzip_man,GRADE=="C")[,c(1,4)]
 colnames(res_gczip_man) <- c("region","value")
 res_gczip_man$region <- as.character(res_gczip_man$region)
 
-par(mfrow=c(2,1))
+
 zip_choropleth(res_gazip_man,
                 county_zoom = 36061,
                 title      = "Percent of Grade A restaurants in Manhattan area",
@@ -224,4 +224,24 @@ zip_choropleth(res_gczip_man,
                 county_zoom = 36061,
                 title      = "Percent of Grade C restaurants in Manhattan area",
                 legend     = "Percent")
+```
+
+ridgeline
+
+```{r}
+res_cuisine10 <- res_one %>%  filter(`CUISINE DESCRIPTION`==top10.type) %>% select(`CUISINE DESCRIPTION`,SCORE,GRADE,CAMIS,DBA)
+#colnames(res_cuisine10) <- c("Cuisine","Score")
+library("ggridges")
+par(mfrow=c(2,1))
+ggplot(res_cuisine10,aes(x=SCORE, y=`CUISINE DESCRIPTION`, fill=`CUISINE DESCRIPTION`))+
+  geom_density_ridges(scale=2,alpha=0.5)+xlim(0,35)+
+  labs(x="Scores deducted", y="Cuisine Types")+
+  ggtitle("")
+
+ggplot(res_cuisine10,aes(x=SCORE, y=`CUISINE DESCRIPTION`, fill=GRADE))+
+  geom_density_ridges(scale=1,alpha=0.5)+xlim(0,35)+
+  labs(x="Scores deducted", y="Cuisine Types")+
+  ggtitle("")
+
+
 ```
