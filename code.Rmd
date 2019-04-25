@@ -180,3 +180,48 @@ ggplot(res_gcuisine,aes(x=`CUISINE DESCRIPTION`,y=n,fill=GRADE))+
   geom_bar(stat="identity",position = "fill")+coord_flip()+labs(y="Percentage",x="cuisine type")+ggtitle("Percentile of Grade for each cuisine type")
 ```
 
+Grade A percentage in each area as zipmap
+
+```{r}
+res_gzip <- res_one %>% filter(GRADE==c("A","B","C"))%>%group_by(ZIPCODE,GRADE)%>% summarise(number=n())%>% group_by(ZIPCODE) %>% mutate(percent = 100*number/sum(number))
+
+res_gazip <- filter(res_gzip,GRADE=="A")[,c(1,4)]
+colnames(res_gazip) <- c("region","value")
+res_gazip$region <- as.character(res_gazip$region)
+
+res_gczip <- filter(res_gzip,GRADE=="C")[,c(1,4)]
+colnames(res_gczip) <- c("region","value")
+res_gczip$region <- as.character(res_gczip$region)
+
+par(mfrow=c(1,2))
+zip_choropleth(res_gazip,
+                county_zoom = nyc_fips,
+                title      = "Percent of Grade A restaurants in each zipcode area",
+                legend     = "Percent")
+
+zip_choropleth(res_gczip,
+                county_zoom = nyc_fips,
+                title      = "Percent of Grade C restaurants in each zipcode area",
+                legend     = "Percent")
+
+res_gzip_man <- res_one %>% filter(GRADE==c("A","B","C"))%>%filter(BORO=="MANHATTAN")%>%group_by(ZIPCODE,GRADE)%>% summarise(number=n())%>% group_by(ZIPCODE) %>% mutate(percent = 100*number/sum(number))
+
+res_gazip_man <- filter(res_gzip_man,GRADE=="A")[,c(1,4)]
+colnames(res_gazip_man) <- c("region","value")
+res_gazip_man$region <- as.character(res_gazip_man$region)
+
+res_gczip_man <- filter(res_gzip_man,GRADE=="C")[,c(1,4)]
+colnames(res_gczip_man) <- c("region","value")
+res_gczip_man$region <- as.character(res_gczip_man$region)
+
+par(mfrow=c(2,1))
+zip_choropleth(res_gazip_man,
+                county_zoom = 36061,
+                title      = "Percent of Grade A restaurants in Manhattan area",
+                legend     = "Percent")
+
+zip_choropleth(res_gczip_man,
+                county_zoom = 36061,
+                title      = "Percent of Grade C restaurants in Manhattan area",
+                legend     = "Percent")
+```
