@@ -242,6 +242,14 @@ ggplot(res_cuisine10,aes(x=SCORE, y=`CUISINE DESCRIPTION`, fill=GRADE))+
   geom_density_ridges(scale=1,alpha=0.5)+xlim(0,35)+
   labs(x="Scores deducted", y="Cuisine Types")+
   ggtitle("")
+```
 
+missing value analysis
 
+```{r}
+library(visdat)
+res_raw <- read_csv("restaurant_data.csv")
+vis_miss(res_raw,warn_large_data = FALSE)
+library(naniar)
+gg_miss_var(res_raw)
 ```
