@@ -258,7 +258,7 @@ ridgeline
 
 ```{r}
 res_cuisine9 <-
-  res_one %>%  filter(`CUISINE DESCRIPTION` == top9.type) %>% select(`CUISINE DESCRIPTION`, SCORE, GRADE, CAMIS, DBA)
+  res %>%  filter(`CUISINE DESCRIPTION` == top9.type) %>% filter(GRADE==c("A","B","C")) 
 library("ggridges")
 par(mfrow = c(2, 1))
 ggplot(res_cuisine9,
@@ -282,21 +282,25 @@ res_raw <- read_csv("restaurant_data.csv", col_types = cols(
     `INSPECTION DATE` = col_date(format = "%m / %d / %Y")
   ))
 vis_miss(res_raw, warn_large_data = FALSE)+coord_flip()
-library(naniar)
-gg_miss_var(res_raw)
 
+res_count <- res_raw %>%
+  group_by(`Month` = floor_date(`INSPECTION DATE`, "month")) %>%tally() %>% filter(Month != "1900-01-01")
+res_count <- res_count[-seq(1,16),]
 res_na <- res_raw %>% filter(is.na(GRADE))%>%
   group_by(`Month` = floor_date(`INSPECTION DATE`, "month")) %>%tally() %>% filter(Month != "1900-01-01")
-ggplot(res_na, aes(x = `Month`, y = n)) +
+res_na <- res_na[-seq(1,10),]
+na_rate <- res_na$n/res_count$n
+res_na$total <- res_count$n
+colnames(res_na) <- c("Month","NAs","Total_Count")
+res_na <- gather(res_na,"Total/NAs","count",2:3)
+ggplot(res_na, aes(x = `Month`, y = count , color=`Total/NAs`)) +
   geom_point() +
   geom_line() +
-  ggtitle("NA by month")
+  ggtitle("NAs by month")
 ```
 
 time series plot
 ```{r}
-#lallala
-
 library("lubridate")
 options(stringsAsFactors = FALSE)
 
@@ -341,43 +345,6 @@ ggplot(vio_month, aes(x = `Month`, y = `count`)) +
   labs(x = "Jan 2017-Apr 2019") +
   facet_wrap( ~ `VIOLATION_CODE`, scales = "free")
 
-#pie chart showing percentage of each violation
-vio_type <- res_ts %>%
-  group_by(`VIOLATION_CODE`) %>%
-  summarise(count = n()) %>%
-  mutate(share = count / sum(count))
-
-ggplot(vio_type, aes(x = "", y = `count`, fill = `VIOLATION_CODE`)) +
-  geom_bar(stat = "identity", width = 1) +
-  coord_polar("y", start = 0) +
-  geom_text(aes(label = paste0(round(share * 100), "%")), position = position_stack(vjust = 0.5)) +
-  labs(x = NULL, y = NULL, title = "Violation Percentage") +
-  theme_void() +
-  theme(
-    axis.line = element_blank(),
-    axis.text = element_blank(),
-    axis.ticks = element_blank(),
-    panel.border = element_blank(),
-    plot.title = element_text(hjust = 0.47)
-  )
-
-#parallel coord plot--see trend in years
-vio_year <- res_ts %>%
-  group_by(`Year` = floor_date(`INSPECTION DATE`, "year"), `VIOLATION_CODE`) %>%
-  summarize(count = n())
-
-ggplot(vio_year,
-       aes(
-         x = `VIOLATION_CODE`,
-         y = `count`,
-         group = `Year`,
-         color = `Year`
-       )) +
-  geom_line() +
-  ggtitle("Violation Type Trend by Year")
-
-
-
 #Finding:
 #1. extreme ups and downs during 2018
 #   --change of inspection freq? (policy)
@@ -404,7 +371,7 @@ fp <-
 f <- filter(vio_month, `VIOLATION_CODE` == "Facilities") %>%
   mutate(`Facilities` = `count`) %>%
   select(`Month`, `Facilities`)
-h <- filter(vio_month, `VIOLATION_CODE` == "Hygine") %>%
+h <- filter(vio_month, `VIOLATION_CODE` == "Hygiene") %>%
   mutate(`Hygine` = `count`) %>%
   select(`Month`, `Hygine`)
 id <- filter(vio_month, `VIOLATION_CODE` == "Interfering duty") %>%
@@ -421,25 +388,9 @@ fake_df <-
   Reduce(function(x, y)
     merge(x, y, all = TRUE), list(ft, rm, fp, f, h, id, v, de))
 
-
-#4 ways to show corr plot
-library(gpairs)
-library(psych)
+#corr plot
 library(GGally)
-gpairs(fake_df)
-ggpairs(fake_df)
 ggcorr(fake_df)
-pairs.panels(
-  fake_df[, -1],
-  method = "pearson",
-  # correlation method
-  hist.col = "#00AFBB",
-  density = TRUE,
-  # show density plots
-  ellipses = TRUE # show correlation ellipses
-)
-
-
 
 #dinning environment by boro vs all vio_type by boro
 dinning_boro <- res_ts %>%
