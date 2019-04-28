@@ -36,6 +36,12 @@ res$`CUISINE DESCRIPTION` <-
     res$`CUISINE DESCRIPTION`
   )
 
+res$`CUISINE DESCRIPTION` <-
+  gsub(
+    "CafÃ©/Coffee/Tea",
+    "Cafe/Coffee/Tea",
+    res$`CUISINE DESCRIPTION`
+  )
 # Latest record for same restaurant
 res_one <-
   arrange(res, desc(`GRADE DATE`)) %>% distinct(CAMIS, .keep_all = TRUE)
@@ -46,7 +52,8 @@ cleveland dot plot of cuisine type by borough
 ```{r}
 # not omitting NAs, to include as much restaurants as possible
 
-res_unique <- read_csv("restaurant_data.csv")[, 1:8] %>% distinct()%>% filter(BORO != "Missing")
+res_unique <-
+  read_csv("restaurant_data.csv")[, 1:8] %>% distinct() %>% filter(BORO != "Missing")
 res_unique$`CUISINE DESCRIPTION` <-
   gsub(
     "Latin \\(Cuban, Dominican, Puerto Rican, South & Central American\\)",
@@ -60,29 +67,54 @@ res_unique$`CUISINE DESCRIPTION` <-
     "Bottled beverages",
     res_unique$`CUISINE DESCRIPTION`
   )
+res_unique$`CUISINE DESCRIPTION` <-
+  gsub(
+    "CafÃ©/Coffee/Tea",
+    "Cafe/Coffee/Tea",
+    res_unique$`CUISINE DESCRIPTION`
+  )
 
-res_borough <- res_unique[,c(3,8)] 
-res_borough$count <- rep(1,nrow(res_borough))
-res_borough_t <- res_borough %>% group_by(`BORO`,`CUISINE DESCRIPTION`) %>% mutate(count=n()) %>% distinct()
+res_borough <- res_unique[, c(3, 8)]
+res_borough$count <- rep(1, nrow(res_borough))
+res_borough_t <- res_borough %>% group_by(`BORO`, `CUISINE DESCRIPTION`) %>% mutate(count = n()) %>% distinct() %>% arrange(desc(count)) %>% group_by(BORO) %>% top_n(10)
 
-ggplot(res_borough_t,aes(x=count,
-                  y=fct_reorder2(`CUISINE DESCRIPTION`,BORO=="MANHATTAN",-count),
-                  color=BORO)
-                  )+  
-  geom_point()+ylab("")
+ggplot(res_borough_t, aes(
+  x = count,
+  y = fct_reorder2(`CUISINE DESCRIPTION`, BORO =="MANHATTAN", -count),
+  color = BORO
+)) +
+  geom_point() + ylab("")
+
+res_borough_nonA <- filter(res_borough_t,`CUISINE DESCRIPTION`!=c("American","Other"))
+ggplot(res_borough_nonA, aes(
+  x = count,
+  y = fct_reorder2(`CUISINE DESCRIPTION`, BORO =="MANHATTAN", -count),
+  color = BORO
+)) +
+  geom_point() + ylab("")
+
+ggplot(res_borough_nonA, aes(
+  x = BORO,
+  y = count,
+  fill = BORO
+)) +
+  geom_bar(position="dodge", stat="identity") + ylab("")+facet_wrap(~`CUISINE DESCRIPTION`) + theme(axis.title.x=element_blank(),
+        axis.text.x=element_blank(),
+        axis.ticks.x=element_blank())
 ```
 
 Exploring cuisine types and geolocations
 
 ```{r}
 # Subsetting for restaurant near columbia
-res_columbia <- filter(res_one,
-                       res_one$ZIPCODE == 10025 |
-                         res_one$ZIPCODE == 10026 |
-                         res_one$ZIPCODE == 10027)
+res_columbia <- filter(
+  res_unique,
+  res_unique$ZIPCODE == 10025 |
+    res_unique$ZIPCODE == 10026 |
+    res_unique$ZIPCODE == 10027
+)
 res_columbia_sum <-
-  res_columbia %>% group_by(`CUISINE DESCRIPTION`) %>% summarize(total =
-                                                                   n()) %>% arrange(desc(total))
+  res_columbia %>% group_by(`CUISINE DESCRIPTION`) %>% summarize(total =n()) %>% arrange(desc(total))%>% top_n(20)
 # histogram
 ggplot(res_columbia_sum) +
   geom_histogram(aes(x = reorder(`CUISINE DESCRIPTION`, total), y = total), stat = "identity") +
@@ -99,20 +131,21 @@ ggplot(res_columbia_sum) +
 library("wordcloud2")
 library("wordcloud")
 
-Chinese<- filter(res_one, res_one$`CUISINE DESCRIPTION` =="Chinese") %>% distinct(DBA) %>% toString() %>% str_remove_all(",") %>% str_remove_all("\"") %>% str_remove_all("\n")%>% str_remove_all("/")
+Chinese <-filter(res_unique, res_unique$`CUISINE DESCRIPTION` == "Chinese") %>% distinct(DBA) %>% toString() %>% str_remove_all(",") %>% str_remove_all("\"") %>% str_remove_all("\n") %>% str_remove_all("/")
 
 word.freq.c <- table(strsplit(Chinese, " ")) %>% as.data.frame()
-colnames(word.freq.c) <- c("Word","Freq")
-wordcloud(word.freq.c$Word,word.freq.c$Freq)
-wordcloud2(word.freq.c,minSize = 2)
+colnames(word.freq.c) <- c("Word", "Freq")
+wordcloud(word.freq.c$Word, word.freq.c$Freq)
+wordcloud2(word.freq.c, minSize = 2)
 # Japanese
 
-Japanese<- filter(res_one, res_one$`CUISINE DESCRIPTION` =="Japanese") %>% distinct(DBA) %>% toString() %>% str_remove_all(",") %>% str_remove_all("\"") %>% str_remove_all("\n")%>% str_remove_all("/")
+Japanese <-
+  filter(res_unique, res_unique$`CUISINE DESCRIPTION` == "Japanese") %>% distinct(DBA) %>% toString() %>% str_remove_all(",") %>% str_remove_all("\"") %>% str_remove_all("\n") %>% str_remove_all("/")
 
 word.freq.j <- table(strsplit(Japanese, " ")) %>% as.data.frame()
-colnames(word.freq.j) <- c("Word","Freq")
-wordcloud(word.freq.j$Word,word.freq.j$Freq)
-wordcloud2(word.freq.j,minSize = 2)
+colnames(word.freq.j) <- c("Word", "Freq")
+wordcloud(word.freq.j$Word, word.freq.j$Freq)
+wordcloud2(word.freq.j, minSize = 2)
 ```
 zipcode plots
 ```{r}
@@ -123,124 +156,161 @@ library(devtools)
 #install_github('arilamstein/choroplethrZip@v1.5.0')
 library(choroplethrZip)
 # NYC zipmap
-res_zip <- res_one %>% group_by(ZIPCODE)%>% summarise(number=n())
-colnames(res_zip) <- c("region","value")
+res_zip <- res_unique %>% group_by(ZIPCODE) %>% summarise(number = n())
+colnames(res_zip) <- c("region", "value")
 res_zip$region <- as.character(res_zip$region)
 nyc_fips <- c(36005, 36047, 36061, 36081, 36085)
 zip_choropleth(res_zip,
-                county_zoom = nyc_fips,
-                title      = "Number of restaurants in New York",
-                legend     = "count")
+               county_zoom = nyc_fips,
+               title      = "Number of restaurants in New York",
+               legend     = "count")
 
 # Manhattan zipmap
-res_man_zip <- res_one %>%filter(BORO=="MANHATTAN") %>%group_by(ZIPCODE)%>% summarise(number=n())
-colnames(res_man_zip) <- c("region","value")
+res_man_zip <-
+  res_unique %>% filter(BORO == "MANHATTAN") %>% group_by(ZIPCODE) %>% summarise(number =
+                                                                                   n())
+colnames(res_man_zip) <- c("region", "value")
 res_man_zip$region <- as.character(res_man_zip$region)
 
-zip_choropleth(res_man_zip,
-                county_zoom = 36061,
-                title      = "Number of restaurants in Manhattan",
-                legend     = "count")
+zip_choropleth(
+  res_man_zip,
+  county_zoom = 36061,
+  title      = "Number of restaurants in Manhattan",
+  legend     = "count"
+)
 
 # Manhattan Chinese zipmap
-res_man_ch_zip <- res_one %>%filter(BORO=="MANHATTAN",`CUISINE DESCRIPTION`=="Chinese") %>%group_by(ZIPCODE)%>% summarise(number=n())
-colnames(res_man_ch_zip) <- c("region","value")
+res_man_ch_zip <-
+  res_one %>% filter(BORO == "MANHATTAN", `CUISINE DESCRIPTION` == "Chinese") %>%
+  group_by(ZIPCODE) %>% summarise(number = n())
+colnames(res_man_ch_zip) <- c("region", "value")
 res_man_ch_zip$region <- as.character(res_man_ch_zip$region)
 
-zip_choropleth(res_man_ch_zip,
-                county_zoom = 36061,
-                title      = "Number of Chinese restaurants in Manhattan",
-                legend     = "count")
+zip_choropleth(
+  res_man_ch_zip,
+  county_zoom = 36061,
+  title      = "Number of Chinese restaurants in Manhattan",
+  legend     = "count"
+)
 
-               
+
 ```
 
 analysis on violations
 
 ```{r}
 # clean out the violations
-res_viotype <- res %>% group_by(`VIOLATION DESCRIPTION`) %>% tally() %>% arrange(desc(n))
+res_viotype <-
+  res %>% group_by(`VIOLATION DESCRIPTION`) %>% tally() %>% arrange(desc(n))
 # rename to make them shorter
-res_viotype[1:10,]$`VIOLATION DESCRIPTION` <- c("Non-food contact surface improperly constructed","Facility not vermin proof","Food contact surface not properly washed, rinsed and sanitized","Food not protected from potential source of contamination","Plumbing not properly installed or maintained","Evidence of mice or live mice present","Cold food item held above 41ºF","Hot food item not held at or above 140ºF","Filth flies or food/refuse/sewage-associated flies present","Food contact surface not properly maintained")
-ggplot(top_n(res_viotype,10),aes(x=`VIOLATION DESCRIPTION`,y=n))+
-  geom_bar(stat = "identity")+ coord_flip()+ggtitle("Top 10 violation reasons")
+res_viotype[1:10, ]$`VIOLATION DESCRIPTION` <-
+  c(
+    "Non-food contact surface improperly constructed",
+    "Facility not vermin proof",
+    "Food contact surface not properly washed, rinsed and sanitized",
+    "Food not protected from potential source of contamination",
+    "Plumbing not properly installed or maintained",
+    "Evidence of mice or live mice present",
+    "Cold food item held above 41ºF",
+    "Hot food item not held at or above 140ºF",
+    "Filth flies or food/refuse/sewage-associated flies present",
+    "Food contact surface not properly maintained"
+  )
+ggplot(top_n(res_viotype, 10), aes(x = `VIOLATION DESCRIPTION`, y = n)) +
+  geom_bar(stat = "identity") + coord_flip() + ggtitle("Top 10 violation reasons")
 
-res_vioboro <- res%>% group_by(`VIOLATION CODE`,`BORO`) %>% tally() %>% arrange(desc(n)) %>% group_by(BORO) %>% top_n(5)
+res_vioboro <-
+  res %>% group_by(`VIOLATION CODE`, `BORO`) %>% tally() %>% arrange(desc(n)) %>% group_by(BORO) %>% top_n(5)
 
-ggplot(res_vioboro,aes(x=`VIOLATION CODE`,y=n))+
-  geom_bar(stat = "identity")+ 
-  facet_wrap(~BORO,scales = "free")+
+ggplot(res_vioboro, aes(x = `VIOLATION CODE`, y = n)) +
+  geom_bar(stat = "identity") +
+  facet_wrap( ~ BORO, scales = "free") +
   ggtitle("Top 5 violation reasons for each borough")
 
-cuisine.top10 <- res %>% group_by(`CUISINE DESCRIPTION`) %>% tally() %>% top_n(10)
-top10.type <- cuisine.top10$`CUISINE DESCRIPTION` 
-res_gcuisine <- res %>% filter(GRADE==c("A","B","C"))%>% filter(`CUISINE DESCRIPTION`==top10.type) %>% group_by(`CUISINE DESCRIPTION`,GRADE) %>% tally() 
+cuisine.top10 <-
+  res %>% group_by(`CUISINE DESCRIPTION`) %>% tally() %>% top_n(10)
+top10.type <- cuisine.top10$`CUISINE DESCRIPTION`
+res_gcuisine <-
+  res %>% filter(GRADE == c("A", "B", "C")) %>% filter(`CUISINE DESCRIPTION` ==
+                                                         top10.type) %>% group_by(`CUISINE DESCRIPTION`, GRADE) %>% tally()
 
-ggplot(res_gcuisine,aes(x=`CUISINE DESCRIPTION`,y=n,fill=GRADE))+
-  geom_bar(stat="identity",position = "fill")+coord_flip()+labs(y="Percentage",x="cuisine type")+ggtitle("Percentile of Grade for each cuisine type")
+ggplot(res_gcuisine, aes(x = `CUISINE DESCRIPTION`, y = n, fill = GRADE)) +
+  geom_bar(stat = "identity", position = "fill") + coord_flip() + labs(y =
+                                                                         "Percentage", x = "cuisine type") + ggtitle("Percentile of Grade for each cuisine type")
 ```
 
 Grade A percentage in each area as zipmap
 
 ```{r}
-res_gzip <- res_one %>% filter(GRADE==c("A","B","C"))%>%group_by(ZIPCODE,GRADE)%>% summarise(number=n())%>% group_by(ZIPCODE) %>% mutate(percent = 100*number/sum(number))
+res_gzip <-
+  res_one %>% filter(GRADE == c("A", "B", "C")) %>% group_by(ZIPCODE, GRADE) %>% summarise(number =
+                                                                                             n()) %>% group_by(ZIPCODE) %>% mutate(percent = 100 * number / sum(number))
 
-res_gazip <- filter(res_gzip,GRADE=="A")[,c(1,4)]
-colnames(res_gazip) <- c("region","value")
+res_gazip <- filter(res_gzip, GRADE == "A")[, c(1, 4)]
+colnames(res_gazip) <- c("region", "value")
 res_gazip$region <- as.character(res_gazip$region)
 
-res_gczip <- filter(res_gzip,GRADE=="C")[,c(1,4)]
-colnames(res_gczip) <- c("region","value")
+res_gczip <- filter(res_gzip, GRADE == "C")[, c(1, 4)]
+colnames(res_gczip) <- c("region", "value")
 res_gczip$region <- as.character(res_gczip$region)
 
-par(mfrow=c(1,2))
+par(mfrow = c(1, 2))
 zip_choropleth(res_gazip,
-                county_zoom = nyc_fips,
-                title      = "Percent of Grade A restaurants in each zipcode area",
-                legend     = "Percent")
+               county_zoom = nyc_fips,
+               title      = "Percent of Grade A restaurants in each zipcode area",
+               legend     = "Percent")
 
 zip_choropleth(res_gczip,
-                county_zoom = nyc_fips,
-                title      = "Percent of Grade C restaurants in each zipcode area",
-                legend     = "Percent")
+               county_zoom = nyc_fips,
+               title      = "Percent of Grade C restaurants in each zipcode area",
+               legend     = "Percent")
 
-res_gzip_man <- res_one %>% filter(GRADE==c("A","B","C"))%>%filter(BORO=="MANHATTAN")%>%group_by(ZIPCODE,GRADE)%>% summarise(number=n())%>% group_by(ZIPCODE) %>% mutate(percent = 100*number/sum(number))
+res_gzip_man <-
+  res_one %>% filter(GRADE == c("A", "B", "C")) %>% filter(BORO == "MANHATTAN") %>%
+  group_by(ZIPCODE, GRADE) %>% summarise(number = n()) %>% group_by(ZIPCODE) %>% mutate(percent = 100 *
+                                                                                          number / sum(number))
 
-res_gazip_man <- filter(res_gzip_man,GRADE=="A")[,c(1,4)]
-colnames(res_gazip_man) <- c("region","value")
+res_gazip_man <- filter(res_gzip_man, GRADE == "A")[, c(1, 4)]
+colnames(res_gazip_man) <- c("region", "value")
 res_gazip_man$region <- as.character(res_gazip_man$region)
 
-res_gczip_man <- filter(res_gzip_man,GRADE=="C")[,c(1,4)]
-colnames(res_gczip_man) <- c("region","value")
+res_gczip_man <- filter(res_gzip_man, GRADE == "C")[, c(1, 4)]
+colnames(res_gczip_man) <- c("region", "value")
 res_gczip_man$region <- as.character(res_gczip_man$region)
 
 
-zip_choropleth(res_gazip_man,
-                county_zoom = 36061,
-                title      = "Percent of Grade A restaurants in Manhattan area",
-                legend     = "Percent")
+zip_choropleth(
+  res_gazip_man,
+  county_zoom = 36061,
+  title      = "Percent of Grade A restaurants in Manhattan area",
+  legend     = "Percent"
+)
 
-zip_choropleth(res_gczip_man,
-                county_zoom = 36061,
-                title      = "Percent of Grade C restaurants in Manhattan area",
-                legend     = "Percent")
+zip_choropleth(
+  res_gczip_man,
+  county_zoom = 36061,
+  title      = "Percent of Grade C restaurants in Manhattan area",
+  legend     = "Percent"
+)
 ```
 
 ridgeline
 
 ```{r}
-res_cuisine10 <- res_one %>%  filter(`CUISINE DESCRIPTION`==top10.type) %>% select(`CUISINE DESCRIPTION`,SCORE,GRADE,CAMIS,DBA)
-#colnames(res_cuisine10) <- c("Cuisine","Score")
+res_cuisine10 <-
+  res_one %>%  filter(`CUISINE DESCRIPTION` == top10.type) %>% select(`CUISINE DESCRIPTION`, SCORE, GRADE, CAMIS, DBA)
 library("ggridges")
-par(mfrow=c(2,1))
-ggplot(res_cuisine10,aes(x=SCORE, y=`CUISINE DESCRIPTION`, fill=`CUISINE DESCRIPTION`))+
-  geom_density_ridges(scale=2,alpha=0.5)+xlim(0,35)+
-  labs(x="Scores deducted", y="Cuisine Types")+
+par(mfrow = c(2, 1))
+ggplot(res_cuisine10,
+       aes(x = SCORE, y = `CUISINE DESCRIPTION`, fill = `CUISINE DESCRIPTION`)) +
+  geom_density_ridges(scale = 2, alpha = 0.5) + xlim(0, 35) +
+  labs(x = "Scores deducted", y = "Cuisine Types") +
   ggtitle("")
 
-ggplot(res_cuisine10,aes(x=SCORE, y=`CUISINE DESCRIPTION`, fill=GRADE))+
-  geom_density_ridges(scale=1,alpha=0.5)+xlim(0,35)+
-  labs(x="Scores deducted", y="Cuisine Types")+
+ggplot(res_cuisine10,
+       aes(x = SCORE, y = `CUISINE DESCRIPTION`, fill = GRADE)) +
+  geom_density_ridges(scale = 1, alpha = 0.5) + xlim(0, 35) +
+  labs(x = "Scores deducted", y = "Cuisine Types") +
   ggtitle("")
 ```
 
@@ -249,7 +319,170 @@ missing value analysis
 ```{r}
 library(visdat)
 res_raw <- read_csv("restaurant_data.csv")
-vis_miss(res_raw,warn_large_data = FALSE)
+vis_miss(res_raw, warn_large_data = FALSE)+coord_flip()
 library(naniar)
 gg_miss_var(res_raw)
+
+datematch <- res$`INSPECTION DATE`==res$`GRADE DATE`
+mean(datematch)
+```
+
+time series plot
+```{r}
+library("lubridate")
+options(stringsAsFactors = FALSE)
+
+#filter date starting 2017-01
+res_ts <- res %>% filter(`INSPECTION DATE` >= "2017-01-01")
+#View(res)
+#group violation code by numeric part & rename
+res_ts <- res_ts %>%
+  mutate(`VIOLATION_CODE` = str_replace(`VIOLATION CODE`, "[A-Z]", "")) %>%
+  mutate(
+    `VIOLATION_CODE` = recode_factor(
+      `VIOLATION_CODE`,
+      "02" = "Food temperature",
+      "03" = "Raw material",
+      "04" = "Food preparation & storage/ rats and fly (KLMNO)",
+      "05" = "Facilities",
+      "06" = "Hygine",
+      "07" = "Interfering duty",
+      "08" = "Vermin",
+      "09" = "Food preparation & storage/ rats and fly (KLMNO)",
+      "10" = "Dining environment"
+    )
+  )
+
+#violation type by month
+vio_month <- res_ts %>%
+  group_by(`Month` = floor_date(`INSPECTION DATE`, "month"), `VIOLATION_CODE`) %>%
+  summarize(count = n())
+
+ggplot(vio_month, aes(x = `Month`, y = `count`, color = `VIOLATION_CODE`)) +
+  geom_point() +
+  geom_line() +
+  ggtitle("Violation Type By month",
+          "test") +
+  labs(x = "Jan 2017-Apr 2019")
+
+#ts plot for each violation
+ggplot(vio_month, aes(x = `Month`, y = `count`)) +
+  geom_point() +
+  geom_line() +
+  ggtitle("Violation Type by Month") +
+  labs(x = "Jan 2017-Apr 2019") +
+  facet_wrap( ~ `VIOLATION_CODE`, scales = "free")
+
+#pie chart showing percentage of each violation
+vio_type <- res_ts %>%
+  group_by(`VIOLATION_CODE`) %>%
+  summarise(count = n()) %>%
+  mutate(share = count / sum(count))
+
+ggplot(vio_type, aes(x = "", y = `count`, fill = `VIOLATION_CODE`)) +
+  geom_bar(stat = "identity", width = 1) +
+  coord_polar("y", start = 0) +
+  geom_text(aes(label = paste0(round(share * 100), "%")), position = position_stack(vjust = 0.5)) +
+  labs(x = NULL, y = NULL, title = "Violation Percentage") +
+  theme_void() +
+  theme(
+    axis.line = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    panel.border = element_blank(),
+    plot.title = element_text(hjust = 0.47)
+  )
+
+#parallel coord plot--see trend in years
+vio_year <- res_ts %>%
+  group_by(`Year` = floor_date(`INSPECTION DATE`, "year"), `VIOLATION_CODE`) %>%
+  summarize(count = n())
+
+ggplot(vio_year,
+       aes(
+         x = `VIOLATION_CODE`,
+         y = `count`,
+         group = `Year`,
+         color = `Year`
+       )) +
+  geom_line() +
+  ggtitle("Violation Type Trend by Year")
+
+
+
+#Finding:
+#1. extreme ups and downs during 2018
+#   --change of inspection freq? (policy)
+#   --food scandals?
+
+#correlation plot month vio
+#1. make a fake data frame
+# --filter vio_type=1
+# --mutate a new column name==vio_type 1 , data filled by count
+
+
+ft <- filter(vio_month, `VIOLATION_CODE` == "Food temperature") %>%
+  mutate(`Food temperature` = `count`) %>%
+  select(`Month`, `Food temperature`)
+
+rm <- filter(vio_month, `VIOLATION_CODE` == "Raw material") %>%
+  mutate(`Raw material` = `count`) %>%
+  select(`Month`, `Raw material`)
+fp <-
+  filter(vio_month,
+         `VIOLATION_CODE` == "Food preparation & storage/ rats and fly (KLMNO)") %>%
+  mutate(`Food preparation & storage/ rats and fly (KLMNO)` = `count`) %>%
+  select(`Month`, `Food preparation & storage/ rats and fly (KLMNO)`)
+f <- filter(vio_month, `VIOLATION_CODE` == "Facilities") %>%
+  mutate(`Facilities` = `count`) %>%
+  select(`Month`, `Facilities`)
+h <- filter(vio_month, `VIOLATION_CODE` == "Hygine") %>%
+  mutate(`Hygine` = `count`) %>%
+  select(`Month`, `Hygine`)
+id <- filter(vio_month, `VIOLATION_CODE` == "Interfering duty") %>%
+  mutate(`Interfering duty` = `count`) %>%
+  select(`Month`, `Interfering duty`)
+v <- filter(vio_month, `VIOLATION_CODE` == "Vermin") %>%
+  mutate(`Vermin` = `count`) %>%
+  select(`Month`, `Vermin`)
+de <- filter(vio_month, `VIOLATION_CODE` == "Dining environment") %>%
+  mutate(`Dining environment` = `count`) %>%
+  select(`Month`, `Dining environment`)
+
+fake_df <-
+  Reduce(function(x, y)
+    merge(x, y, all = TRUE), list(ft, rm, fp, f, h, id, v, de))
+
+
+#4 ways to show corr plot
+library(gpairs)
+library(psych)
+library(GGally)
+gpairs(fake_df)
+ggpairs(fake_df)
+ggcorr(fake_df)
+pairs.panels(
+  fake_df[, -1],
+  method = "pearson",
+  # correlation method
+  hist.col = "#00AFBB",
+  density = TRUE,
+  # show density plots
+  ellipses = TRUE # show correlation ellipses
+)
+
+
+
+#dinning environment by boro vs all vio_type by boro
+dinning_boro <- res_ts %>%
+  # filter(`VIOLATION_CODE`=="Dining environment") %>%
+  group_by(`Month` = floor_date(`INSPECTION DATE`, "month"), `BORO`, `VIOLATION_CODE`) %>%
+  summarise(count = n())
+
+ggplot(dinning_boro, aes(x = `Month`, y = `count`, color = `BORO`)) +
+  geom_point() +
+  geom_line() +
+  ggtitle("Violation: Dinning Environment by BORO") +
+  facet_wrap( ~ `VIOLATION_CODE`, scales = "free")
+
 ```
