@@ -318,13 +318,22 @@ missing value analysis
 
 ```{r}
 library(visdat)
-res_raw <- read_csv("restaurant_data.csv")
+res_raw <- read_csv("restaurant_data.csv", col_types = cols(
+    `INSPECTION DATE` = col_date(format = "%m / %d / %Y")
+  ))
 vis_miss(res_raw, warn_large_data = FALSE)+coord_flip()
 library(naniar)
 gg_miss_var(res_raw)
 
 datematch <- res$`INSPECTION DATE`==res$`GRADE DATE`
 mean(datematch)
+
+res_na <- res_raw %>% filter(is.na(GRADE))%>%
+  group_by(`Month` = floor_date(`INSPECTION DATE`, "month")) %>%tally()
+ggplot(res_na, aes(x = `Month`, y = n)) +
+  geom_point() +
+  geom_line() +
+  ggtitle("NA by month")
 ```
 
 time series plot
