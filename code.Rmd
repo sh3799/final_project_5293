@@ -338,6 +338,8 @@ ggplot(res_na, aes(x = `Month`, y = n)) +
 
 time series plot
 ```{r}
+#lallala
+
 library("lubridate")
 options(stringsAsFactors = FALSE)
 
