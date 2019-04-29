@@ -35,7 +35,7 @@ General Structure:
               03: Raw material
               04: Food preparation & storage/ rats and fly (KLMNO)
               05: Facilities 
-              06: Hygine
+              06: Hygiene
               07: Interfering duty
               08: Vermin
               09: 04
