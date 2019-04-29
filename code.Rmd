@@ -146,13 +146,13 @@ grid.arrange(t1, t2, nrow = 1)
 
 The left-hand-side plot of top 20 cuisine types shows that American style restaurant in NYC is the most, more than doubling the number of Chinese restaurants, which is in the second place. This should not be surprising, as New York is in America. However, while cafes and pizza are common to American people, the number of Chinese restaurants is out of expectation. 
 
-On the right-hand-side, the plot shows how much restaurants are there in each boro. Clearly Manhattan has the most, and Queens and Brooklyn are fairly close. Bronx has only about one-fifth of Manhattans’, and Staten Island has even less. To get more details about the distribution of different genres of restaurants across boros, we created a new plot
+On the right-hand-side, the plot shows how much restaurants are there in each borough. Clearly Manhattan has the most, and Queens and Brooklyn are fairly close. Bronx has only about one-fifth of Manhattans’, and Staten Island has even less. To get more details about the distribution of different genres of restaurants across boroughs, we created a new plot.
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 t3
 ```
 
-This plot picked top 9 cuisine types in terms of restaurant counts, and is divided up by different boro. It’s interesting to see that, the distribution of each restaurant types across boros are not the same at all. Generally, Manhattan still has the highest number of restaurants in 6 out of 9 cuisine types. But there are some interesting patterns. For example, Brooklyn and Queens have more Chinese restaurants than Manhattan, and Queens have more Latino Restaurants than any other boros. This might have some relationship with the demographics at each boro.  
+This plot picked top 9 cuisine types in terms of restaurant counts, and is divided up by different borough. It’s interesting to see that, the distribution of each restaurant types across boroughs are not the same at all. Generally, Manhattan still has the highest number of restaurants in 6 out of 9 cuisine types. But there are some interesting patterns. For example, Brooklyn and Queens have more Chinese restaurants than Manhattan, and Queens have more Latino restaurants than any other boroughs. This might have some relationship with the demographics at each borough.  
 
 ## Restaurants near Columbia University
 
@@ -256,14 +256,15 @@ vio_2 <- ggplot(res_vioboro, aes(x = `VIOLATION CODE`, y = n)) +
 grid.arrange(vio_1, vio_2, nrow = 2)
 ```
 
-This left-hand-side plot showed the top 10 violations during the inspections. The most violated reason is called “non-food contact surface improperly constructed”, which refers to surfaces such as food carts, tools, clothes. Besides, there are more concerning violations, such as presence of filth flies and mice. Knowing that a restaurant has violations in these areas, we might want to find another restaurant instead. On the right-hand-side, the plot showed top 5 violations in each boro, and as it displayed, violations in each boro are about the same, in terms of proportion and ranking, with only slight changes.
+This left-hand-side plot showed the top 10 violations during the inspections. The most violated reason is called “non-food contact surface improperly constructed”, which refers to surfaces such as food carts, tools, clothes. Besides, there are more concerning violations, such as presence of filth flies and mice. Knowing that a restaurant has violations in these areas, we might want to find another restaurant instead. On the right-hand-side, the plot showed top 5 violations in each borough, and as it displayed, violations in each borough are about the same, in terms of proportion and ranking, with only slight changes.
 
 
 
 ## Time Series Plot
 
-```{r echo=FALSE,warning=FALSE,message=FALSE}
+Let’s move on to time series plots showing the amount of each violation type by month from January 2017 to April 2019. All violation cases generally increased with time, while there were extreme ups and downs during 2018. Unfortunately, there were no food scandals nor inspection policy changes that match within this timeframe. 
 
+```{r echo=FALSE,warning=FALSE,message=FALSE}
 options(stringsAsFactors = FALSE)
 
 #filter date starting 2017-01
@@ -279,7 +280,7 @@ res_ts <- res_ts %>%
       "03" = "Raw material",
       "04" = "Food preparation & storage/ rats and fly (KLMNO)",
       "05" = "Facilities",
-      "06" = "Hygine",
+      "06" = "Hygiene",
       "07" = "Interfering duty",
       "08" = "Vermin",
       "09" = "Food preparation & storage/ rats and fly (KLMNO)",
@@ -296,16 +297,16 @@ ggplot(vio_month, aes(x = `Month`, y = `count`, color = `VIOLATION_CODE`)) +
   geom_point() +
   geom_line() +
   ggtitle("Violation Type By month",
-          "test") +
+          "All 8 Violations") +
   labs(x = "Jan 2017-Apr 2019")
 
 #ts plot for each violation
-ggplot(vio_month, aes(x = `Month`, y = `count`)) +
-  geom_point() +
-  geom_line() +
-  ggtitle("Violation Type by Month") +
-  labs(x = "Jan 2017-Apr 2019") +
-  facet_wrap( ~ `VIOLATION_CODE`, scales = "free")
+#ggplot(vio_month, aes(x = `Month`, y = `count`)) +
+#  geom_point() +
+#  geom_line() +
+#  ggtitle("Violation Type by Month") +
+#  labs(x = "Jan 2017-Apr 2019") +
+#  facet_wrap( ~ `VIOLATION_CODE`, scales = "free")
 
 #Finding:
 #1. extreme ups and downs during 2018
@@ -334,8 +335,8 @@ f <- filter(vio_month, `VIOLATION_CODE` == "Facilities") %>%
   mutate(`Facilities` = `count`) %>%
   select(`Month`, `Facilities`)
 h <- filter(vio_month, `VIOLATION_CODE` == "Hygiene") %>%
-  mutate(`Hygine` = `count`) %>%
-  select(`Month`, `Hygine`)
+  mutate(`Hygiene` = `count`) %>%
+  select(`Month`, `Hygiene`)
 id <- filter(vio_month, `VIOLATION_CODE` == "Interfering duty") %>%
   mutate(`Interfering duty` = `count`) %>%
   select(`Month`, `Interfering duty`)
@@ -349,11 +350,11 @@ de <- filter(vio_month, `VIOLATION_CODE` == "Dining environment") %>%
 fake_df <-
   Reduce(function(x, y)
     merge(x, y, all = TRUE), list(ft, rm, fp, f, h, id, v, de))
+```
 
-#corr plot
-library(GGally)
-ggcorr(fake_df)
+Zoom in on violations changes in each borough, we found Manhattan has most violations in most of the types except facilities, which makes sense because Manhattan has the largest number of restaurants. In fact, the number of violations in each type is proportional to the total amount of restaurants in each borough.
 
+```{r echo=FALSE,warning=FALSE,message=FALSE}
 #dinning environment by boro vs all vio_type by boro
 dinning_boro <- res_ts %>%
   # filter(`VIOLATION_CODE`=="Dining environment") %>%
@@ -363,15 +364,21 @@ dinning_boro <- res_ts %>%
 ggplot(dinning_boro, aes(x = `Month`, y = `count`, color = `BORO`)) +
   geom_point() +
   geom_line() +
-  ggtitle("Violation: Dinning Environment by BORO") +
+  ggtitle("Violation by BORO") +
   facet_wrap( ~ `VIOLATION_CODE`, scales = "free")
-
 ```
 
+We also made a correlation plot between the eight violations and marked the correlation with absolute value greater than 0.05. Many violation types are highly positive correlated. For example, Food preparation & storage/ rats and fly (KLMNO) and vermin has correlation coefficient close to 1, meaning there is a strong linear relationship between the two variables. Considering that rats and vermin thrive in similar environments where foods and shelter are available, restaurants that fight rats often battle with vermin. Interesting, interfering duty and presence of vermin are also positively correlated (0.6). Restaurants with vermin might be more likely to interfere duty to impede grading process, thus interfering duty would be a confounding variable.
 
+```{r echo=FALSE,warning=FALSE,message=FALSE}
+#corr plot
+library(GGally)
+ggcorr(fake_df, geom = "blank", label = TRUE, hjust = 0.75) +
+  geom_point(size = 10, aes(color = coefficient > 0, alpha = abs(coefficient) > 0.5)) +
+  scale_alpha_manual(values = c("TRUE" = 0.25, "FALSE" = 0)) +
+  guides(color = FALSE, alpha = FALSE)
 
-
-
+```
 
 After understanding the violation reasons, we now focus on the grades. Here’s a plot with grading for top 10 most cuisine types.
 
@@ -468,7 +475,7 @@ The distribution of grade A scores has a mode at above 10, which matches previou
 
 # Conclusion
 
-Through these plots, we have many interesting findings: cuisine types with the greatest number of restaurants across boros in NYC, where to find unknown Mexican food, top 10 health inspection violations, the weird distribution of inspection scores, etc. Overall, this project might provide you some guidance when you’re thinking of eating in a restaurant in NYC. 
+Through these plots, we have many interesting findings: cuisine types with the greatest number of restaurants across boroughs in NYC, where to find unknown Mexican food, top 10 health inspection violations, the weird distribution of inspection scores, etc. Overall, this project might provide you some guidance when you’re thinking of eating in a restaurant in NYC. 
 
 There’s much more we can investigate, for example, the relationship between specific cuisine type restaurant distribution and demographics, and the reason for restaurants getting grade C without losing many points.
 
