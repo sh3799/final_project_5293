@@ -13,11 +13,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 New York, as one of the most famous cities throughout the world, is well-known for a lot of things. Among all, food is a topic that everyone loves. In New York, there’s almost nothing you can’t find. From Michelin restaurants, to street-side exotic food trucks, one can always find his/hers favorite. While we’re enjoying our favorite dish, there’s one issue we must not ignore: How clean are these foods? 
 
-### Description of the data source
+## Description of the data source
 
 The data being used in this project is the inspection result of New York City Restaurants, which is conducted by Department of Mental Health and Hygiene. The data consists of 18 columns, including Restaurant’s name, cuisine type, address, inspection dates & results, and sanity grading. The data is downloaded from NYC Open Data, and by the time of download, it contains 384,408 rows, representing the result of 384,408 inspections on restaurants all over New York city. This is a very comprehensive dataset, but with many NA’s included. After cleaning all NAs, there’s only 187,591 records left. On the other hand, there’re some noticeable issues, such as labeling a chain restaurant with different cuisine types. But overall, this is a very thorough and informative dataset.
 
-### Description of data import/cleaning/transformation
+## Description of data import/cleaning/transformation
 
 The raw data is being imported as res_raw, mainly for missing value analysis. Since the amount of data is sufficiently large, we could still have an informative dataset, even if all rows containing NA are removed, and this is the res dataset. Notice that this dataset contains multiple inspection results for same restaurants at different time. Thus, we filtered and kept the latest record for every restaurant, and named it res_one. 
 
@@ -154,7 +154,7 @@ t3
 
 This plot picked top 9 cuisine types in terms of restaurant counts, and is divided up by different boro. It’s interesting to see that, the distribution of each restaurant types across boros are not the same at all. Generally, Manhattan still has the highest number of restaurants in 6 out of 9 cuisine types. But there are some interesting patterns. For example, Brooklyn and Queens have more Chinese restaurants than Manhattan, and Queens have more Latino Restaurants than any other boros. This might have some relationship with the demographics at each boro.  
 
-### Restaurants near Columbia University
+## Restaurants near Columbia University
 
 As a Columbia student, I’m very interested in how restaurants near Columbia are distributed. Here’s a plot of top 20 restaurant types near Columbia, comparing to top 20 in Manhattan.
 
@@ -183,7 +183,7 @@ grid.arrange(p1, p2, nrow = 1)
 
 Columbia has more Chinese restaurants, and fast food such as hamburger, comparing to Manhattan’s top 20, which makes sense, as Columbia has many Chinese students, and students tend to prefer fast food over fine dining.
 
-### Heatmaps
+## Heatmaps
 
 There’re always some occasions which, you want to hangout and find a decent restaurant, but have no target in mind. To figure out where’s the most restaurant-dense area, we plot a heat map based on zipcode-zones.
 
@@ -221,7 +221,7 @@ grid.arrange(h_nyc, h_mx, nrow = 1)
 
 From plot, downtown Manhattan, Bay-bridge in Brooklyn, and Flushing in Queens are the most restaurant-dense areas. If you are interested in a specific type of food, for example, Mexican food, you might want to go to areas like upper-east Manhattan, downtown Manhattan or Willamsburg Brooklyn, and avoid the black areas on the map, because either there isn’t any Mexican restaurant, or there is no Mexican restaurant with a proper health inspection grade. 
 
-### Analysis on Violations
+## Analysis on Violations
 
 Next, we’ll get to know more about health inspection violations among restaurants in New York. Before talking about any specific restaurant, let’s first learn about the violations.
 
@@ -260,7 +260,7 @@ This left-hand-side plot showed the top 10 violations during the inspections. Th
 
 
 
-### Time Series Plot
+## Time Series Plot
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 
@@ -434,7 +434,7 @@ grid.arrange(g2, g3, nrow = 1)
 
 The plot does not show any interesting patterns by itself. Areas with deep colors are spread out, and it’s hard to conclude if there’s a large area with very high percentage of grade A. Note that the scale is not evenly distributed, so an area with pale blue does not mean it's an area with lwo A%. They are still decent, but not as good as the best ones.
 
-### Grading of a restaurant
+## Grading of a restaurant
 
 The grading of each restaurant is determined by score deducted during inspection. 0-13 = A, 14-27 = B, 28+ = C. That is to say, two grade A restaurants could be very different in points being deducted. Therefore, we created a plot with top 9 cuisine types and their score distribution.
 
