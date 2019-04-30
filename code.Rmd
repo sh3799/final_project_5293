@@ -278,12 +278,12 @@ res_ts <- res_ts %>%
       `VIOLATION_CODE`,
       "02" = "Food temperature",
       "03" = "Raw material",
-      "04" = "Food preparation & storage/ rats and fly (KLMNO)",
+      "04" = "KLMNO",
       "05" = "Facilities",
       "06" = "Hygiene",
       "07" = "Interfering duty",
       "08" = "Vermin",
-      "09" = "Food preparation & storage/ rats and fly (KLMNO)",
+      "09" = "KLMNO",
       "10" = "Dining environment"
     )
   )
@@ -328,9 +328,9 @@ rm <- filter(vio_month, `VIOLATION_CODE` == "Raw material") %>%
   select(`Month`, `Raw material`)
 fp <-
   filter(vio_month,
-         `VIOLATION_CODE` == "Food preparation & storage/ rats and fly (KLMNO)") %>%
-  mutate(`Food preparation & storage/ rats and fly (KLMNO)` = `count`) %>%
-  select(`Month`, `Food preparation & storage/ rats and fly (KLMNO)`)
+         `VIOLATION_CODE` == "KLMNO") %>%
+  mutate(`KLMNO` = `count`) %>%
+  select(`Month`, `KLMNO`)
 f <- filter(vio_month, `VIOLATION_CODE` == "Facilities") %>%
   mutate(`Facilities` = `count`) %>%
   select(`Month`, `Facilities`)
