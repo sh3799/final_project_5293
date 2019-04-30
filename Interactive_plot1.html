@@ -36,14 +36,11 @@ var svg = d3.select("#my_dataviz")
   .attr("transform", "translate(" + width / 4 + "," + height / 2 + ")");
 
 // create 5 data_set
-var data1 = {a: 1547, Raw_material: 17, c:2915, d:69, e:2196, g:1698, h:4129};
-var data2 = {a: 6117, Raw_material: 103, c:11352, d:330, e:11820, f:2, g:6257, h:18629}
-var data3 = {a: 3972, Raw_material: 85, c:7513, d:255, e:7086, f:4, g:4354, h:11723};
-var data4 = {a: 3565, Raw_material: 77, c:6882, d:248, e:7172, g:3699,h:10472};
-var data5 = {a: 586,  Raw_material: 10, c:1020, d:40, e:1127, g:492, h:1682};
-//"Food_temperature", "Raw_material", "Food preparation & storage/ rats and fly (KLMNO)",
- // "Facilities", "Hygiene", "Interfering duty", "Vermin", "Dining environment"
-//"a", "b","c", "d", "e", "f", "g", "h"
+var data1 = {a: 1547, b: 17, c:2915, d:69, e:2196, f:0, g:1698, h:4129};
+var data2 = {a: 6117, b: 103, c:11352, d:330, e:11820, f:2, g:6257, h:18629}
+var data3 = {a: 3972, b: 85, c:7513, d:255, e:7086, f:4, g:4354, h:11723};
+var data4 = {a: 3565, b: 77, c:6882, d:248, e:7172, f:0,g:3699,h:10472};
+var data5 = {a: 586,  b: 10, c:1020, d:40, e:1127, f:0, g:492, h:1682};
 
 // set the color scale
 var color = d3.scaleOrdinal()
