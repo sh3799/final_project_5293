@@ -1,13 +1,13 @@
 ---
 title:<center> <h1>"Project Report"</h1></center>
 author: "Sixing Hao, Weijia Bao"
-output: html_document
+output: 
+  html_document:
+  code_folding: hide
 ---
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
 
 # Introduction
 
@@ -20,7 +20,6 @@ The data being used in this project is the inspection result of New York City Re
 ## Description of data import/cleaning/transformation
 
 The raw data is being imported as res_raw, mainly for missing value analysis. Since the amount of data is sufficiently large, we could still have an informative dataset, even if all rows containing NA are removed, and this is the res dataset. Notice that this dataset contains multiple inspection results for same restaurants at different time. Thus, we filtered and kept the latest record for every restaurant, and named it res_one. 
-
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 library(tidyverse)
@@ -258,8 +257,6 @@ grid.arrange(vio_1, vio_2, nrow = 2)
 
 This left-hand-side plot showed the top 10 violations during the inspections. The most violated reason is called “non-food contact surface improperly constructed”, which refers to surfaces such as food carts, tools, clothes. Besides, there are more concerning violations, such as presence of filth flies and mice. Knowing that a restaurant has violations in these areas, we might want to find another restaurant instead. On the right-hand-side, the plot showed top 5 violations in each borough, and as it displayed, violations in each borough are about the same, in terms of proportion and ranking, with only slight changes.
 
-
-
 ## Time Series Plot
 
 Let’s move on to time series plots showing the amount of each violation type by month from January 2017 to April 2019. All violation cases generally increased with time, while there were extreme ups and downs during 2018. Unfortunately, there were no food scandals nor inspection policy changes that match within this timeframe. 
@@ -299,24 +296,6 @@ ggplot(vio_month, aes(x = `Month`, y = `count`, color = `VIOLATION_CODE`)) +
   ggtitle("Violation Type By month",
           "All 8 Violations") +
   labs(x = "Jan 2017-Apr 2019")
-
-#ts plot for each violation
-#ggplot(vio_month, aes(x = `Month`, y = `count`)) +
-#  geom_point() +
-#  geom_line() +
-#  ggtitle("Violation Type by Month") +
-#  labs(x = "Jan 2017-Apr 2019") +
-#  facet_wrap( ~ `VIOLATION_CODE`, scales = "free")
-
-#Finding:
-#1. extreme ups and downs during 2018
-#   --change of inspection freq? (policy)
-#   --food scandals?
-
-#correlation plot month vio
-#1. make a fake data frame
-# --filter vio_type=1
-# --mutate a new column name==vio_type 1 , data filled by count
 
 
 ft <- filter(vio_month, `VIOLATION_CODE` == "Food temperature") %>%
@@ -367,7 +346,9 @@ ggplot(dinning_boro, aes(x = `Month`, y = `count`, color = `BORO`)) +
   facet_wrap( ~ `VIOLATION_CODE`, scales = "free")
 ```
 
-We also made a correlation plot between the eight violations and marked the correlation with absolute value greater than 0.05. Many violation types are highly positive correlated. For example, Food preparation & storage/ rats and fly (KLMNO) and vermin has correlation coefficient close to 1, meaning there is a strong linear relationship between the two variables. Considering that rats and vermin thrive in similar environments where foods and shelter are available, restaurants that fight rats often battle with vermin. Interesting, interfering duty and presence of vermin are also positively correlated (0.6). Restaurants with vermin might be more likely to interfere duty to impede grading process, thus interfering duty would be a confounding variable.
+##Correlation Plot
+
+We also made a correlation plot between the eight violations and marked the correlation with absolute value greater than 0.05. 
 
 ```{r echo=FALSE,warning=FALSE,message=FALSE}
 #corr plot
@@ -378,6 +359,8 @@ ggcorr(fake_df, geom = "blank", label = TRUE, hjust = 0.75) +
   guides(color = FALSE, alpha = FALSE)
 
 ```
+
+Many violation types are highly positive correlated. For example, Food preparation & storage/ rats and fly (KLMNO) and vermin has correlation coefficient close to 1, meaning there is a strong linear relationship between the two variables. Considering that rats and vermin thrive in similar environments where foods and shelter are available, restaurants that fight rats often battle with vermin. Interesting, interfering duty and presence of vermin are also positively correlated (0.6). Restaurants with vermin might be more likely to interfere duty to impede grading process, thus interfering duty would be a confounding variable.
 
 After understanding the violation reasons, we now focus on the grades. Here’s a plot with grading for top 10 most cuisine types.
 
@@ -472,6 +455,22 @@ r2
 
 The distribution of grade A scores has a mode at above 10, which matches previous findings, and grade B’s have a non-surprising distribution. But there is some irregularity in the distribution of C’s. There are some grade C restaurants with low point deduction. These “outliers” appeared in Pizza, Mexican, Japanese restaurants, and bakeries. 
 
+##Interactive Component
+
+Here are links to our two interactive plots:
+
+Interactive plot 1: https://bl.ocks.org/wb2326/b093a583e879ac09c54455d370c80fe3
+
+The interactive plot shows how violations are distributed depending on borough.
+
+The default is set to Bronx. You can also click on other borough names to checkout the corresponding distribution.
+
+Interactive plot 2: https://bl.ocks.org/wb2326/cf672fe68a75fac6e26cb9f1baf1f053
+
+This webpage is to act as an interactive dashboard containng a bar chart, a pie chart, and a table that users can use to learn about how violations correlated with boroughs.
+
+By default, the bar chart shows the sum of segments by violation types as the height of each bar, and pie chart shows the percentage of total violations in each borough.
+
 # Conclusion
 
 Through these plots, we have many interesting findings: cuisine types with the greatest number of restaurants across boroughs in NYC, where to find unknown Mexican food, top 10 health inspection violations, the weird distribution of inspection scores, etc. With all the information provided above, it is definitely necessary for us to check the inspection grades: to see what score it gets, to see what it violates, and to see when the grading was. Overall, this project might provide you some guidance when you’re thinking of eating in a restaurant in NYC. 
@@ -479,4 +478,3 @@ Through these plots, we have many interesting findings: cuisine types with the g
 The data we found from Open Data NYC is a very thorough dataset, and provided many insights. However, when doing exploratory data analysis, we noticed some errors in the data. For example, for a chain restaurant, names of different branches are not always the same. Popeyes is a chained southern style fast food restaurant, but somehow in the dataset, there're several restaurants with the word "Popeye" inside, and they appeared to be the same restaurant. On the other hand, there are chain restaurants being classified as different cuisine types as well. The labelling process contains many mistakes, which might be a potential weakness.
 
 There’s much more we can investigate, for example, the relationship between specific cuisine type restaurant distribution and demographics, and the reason for restaurants getting grade C without losing many points.
-
