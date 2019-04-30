@@ -1,5 +1,5 @@
 ---
-title: <center> <h1>Project Report</h1></center>
+title:<center> <h1>"Project Report"</h1></center>
 author: "Sixing Hao, Weijia Bao"
 output: 
   html_document:
