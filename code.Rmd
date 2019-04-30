@@ -327,8 +327,7 @@ rm <- filter(vio_month, `VIOLATION_CODE` == "Raw material") %>%
   mutate(`Raw material` = `count`) %>%
   select(`Month`, `Raw material`)
 fp <-
-  filter(vio_month,
-         `VIOLATION_CODE` == "KLMNO") %>%
+  filter(vio_month,`VIOLATION_CODE` == "KLMNO") %>%
   mutate(`KLMNO` = `count`) %>%
   select(`Month`, `KLMNO`)
 f <- filter(vio_month, `VIOLATION_CODE` == "Facilities") %>%
