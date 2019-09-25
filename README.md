@@ -2,7 +2,7 @@
 
 Project description: visualizaiton of inspection result of New York City Restaurants, which is conducted by Department of Mental Health and Hygiene
 
-+ [Project report](Final Project_Group16.html)
++ [Project report](/Final Project_Group16.html)
 
 Source of Data: https://data.cityofnewyork.us/Health/DOHMH-New-York-City-Restaurant-Inspection-Results/43nn-pn8j
 
